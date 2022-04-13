@@ -914,14 +914,14 @@ func TestSanitize(t *testing.T) {
 			expected: "",
 		},
 		{
-			name:     "linux path is unchanged",
+			name:     "linux path to file trims leading /",
 			value:    "/path/to/file",
-			expected: "/path/to/file",
+			expected: "path/to/file",
 		},
 		{
-			name:     "linux path to directory is unchanged",
+			name:     "linux path to directory trims leading /",
 			value:    "/path/to/dir/",
-			expected: "/path/to/dir/",
+			expected: "path/to/dir/",
 		},
 		{
 			name:     "handles linux root path",

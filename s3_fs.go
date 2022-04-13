@@ -158,7 +158,6 @@ func (fs *Fs) OpenFile(name string, flag int, _ os.FileMode) (afero.File, error)
 	}
 
 	info, err := file.Stat()
-
 	if err != nil {
 		return nil, err
 	}
@@ -247,9 +246,8 @@ func (fs *Fs) Rename(oldname, newname string) error {
 func (fs *Fs) Stat(name string) (os.FileInfo, error) {
 	name = sanitize(name)
 
-	// Special case because you can not HeadObject on the bucket itself.
-	if name == "/" {
-		return NewFileInfo(name, true, 0, time.Unix(0, 0)), nil
+	if strings.HasSuffix(name, "/") {
+		return fs.statDirectory(name)
 	}
 
 	out, err := fs.client.HeadObject(context.Background(), &s3.HeadObjectInput{
@@ -257,31 +255,30 @@ func (fs *Fs) Stat(name string) (os.FileInfo, error) {
 		Key:    aws.String(name),
 	})
 	if err != nil {
-		errOp := &smithy.OperationError{}
-		if errors.As(err, &errOp) {
-			if errOp.OperationName == "HeadObject" {
-				statDir, errStat := fs.statDirectory(name)
-				return statDir, errStat
-			}
+		// if it is a not found error, then we try to treat it as a directory
+		// before we give up.
+		var ae smithy.APIError
+		if errors.As(err, &ae) && ae.ErrorCode() == "NotFound" {
+			return fs.statDirectory(name)
 		}
-
 		return FileInfo{}, &os.PathError{
 			Op:   "stat",
 			Path: name,
 			Err:  err,
 		}
-	} else if strings.HasSuffix(name, "/") {
-		// user asked for a directory, but this is a file
-		return FileInfo{name: name}, nil
 	}
 	return NewFileInfo(path.Base(name), false, out.ContentLength, *out.LastModified), nil
 }
 
 func (fs *Fs) statDirectory(name string) (os.FileInfo, error) {
-	nameClean := path.Clean(name)
+	// Special case because you can not HeadObject on the bucket itself.
+	if name == "/" {
+		return NewFileInfo(name, true, 0, time.Unix(0, 0)), nil
+	}
+
 	out, err := fs.client.ListObjectsV2(context.Background(), &s3.ListObjectsV2Input{
 		Bucket:  aws.String(fs.bucket),
-		Prefix:  aws.String(strings.TrimPrefix(nameClean, "/")),
+		Prefix:  aws.String(name),
 		MaxKeys: 1,
 	})
 	if err != nil {
@@ -396,5 +393,13 @@ func sanitize(name string) string {
 	}
 
 	// s3 requires forward slashes
-	return filepath.ToSlash(out)
+	out = filepath.ToSlash(out)
+
+	// a special case for the root path
+	if out == "/" {
+		return out
+	}
+
+	// s3 keys should not start with a slash
+	return strings.TrimPrefix(out, "/")
 }
