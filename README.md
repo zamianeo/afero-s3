@@ -67,6 +67,7 @@ func main() {
 	n, _ := io.Copy(out, src)
 
 	log.Printf("copied %d bytes", n)
+}
 ```
 
 ## Development
