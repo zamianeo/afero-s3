@@ -1,8 +1,8 @@
 # S3 Backend for Afero
 
-![Build](https://github.com/contiamo/afero-s3/workflows/Build/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/contiamo/afero-s3)](https://goreportcard.com/report/contiamo/afero-s3)
-[![GoDoc](https://godoc.org/github.com/contiamo/afero-s3?status.svg)](https://godoc.org/github.com/contiamo/afero-s3)
+![Build](https://github.com/zamianeo/afero-s3/workflows/Build/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/zamianeo/afero-s3)](https://goreportcard.com/report/zamianeo/afero-s3)
+[![GoDoc](https://godoc.org/github.com/zamianeo/afero-s3?status.svg)](https://godoc.org/github.com/zamianeo/afero-s3)
 
 ## About
 
@@ -34,7 +34,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 
-	s3fs "github.com/contiamo/afero-s3"
+	s3fs "github.com/zamianeo/afero-s3"
 )
 
 var (

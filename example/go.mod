@@ -1,4 +1,4 @@
-module github.com/contiamo/afero-s3/example
+module github.com/zamianeo/afero-s3/example
 
 go 1.18
 

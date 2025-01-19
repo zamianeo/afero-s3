@@ -1,4 +1,4 @@
-module github.com/contiamo/afero-s3
+module github.com/zamianeo/afero-s3
 
 go 1.18
 
