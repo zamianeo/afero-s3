@@ -267,7 +267,7 @@ func (fs *Fs) Stat(name string) (os.FileInfo, error) {
 			Err:  err,
 		}
 	}
-	return NewFileInfo(path.Base(name), false, out.ContentLength, *out.LastModified), nil
+	return NewFileInfo(path.Base(name), false, *out.ContentLength, *out.LastModified), nil
 }
 
 func (fs *Fs) statDirectory(name string) (os.FileInfo, error) {
@@ -279,7 +279,7 @@ func (fs *Fs) statDirectory(name string) (os.FileInfo, error) {
 	out, err := fs.client.ListObjectsV2(context.Background(), &s3.ListObjectsV2Input{
 		Bucket:  aws.String(fs.bucket),
 		Prefix:  aws.String(name),
-		MaxKeys: 1,
+		MaxKeys: aws.Int32(1),
 	})
 	if err != nil {
 		return FileInfo{}, &os.PathError{
@@ -288,7 +288,7 @@ func (fs *Fs) statDirectory(name string) (os.FileInfo, error) {
 			Err:  err,
 		}
 	}
-	if out.KeyCount == 0 && name != "" {
+	if *out.KeyCount == 0 && name != "" {
 		return nil, &os.PathError{
 			Op:   "stat",
 			Path: name,

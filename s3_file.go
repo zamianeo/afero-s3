@@ -80,13 +80,13 @@ func (f *File) Readdir(n int) ([]os.FileInfo, error) {
 		Bucket:            aws.String(f.fs.bucket),
 		Prefix:            &name,
 		Delimiter:         aws.String("/"),
-		MaxKeys:           int32(n),
+		MaxKeys:           aws.Int32(int32(n)),
 	})
 	if err != nil {
 		return nil, err
 	}
 	f.readdirContinuationToken = output.NextContinuationToken
-	if !output.IsTruncated {
+	if !*output.IsTruncated {
 		f.readdirNotTruncated = true
 	}
 
@@ -101,7 +101,7 @@ func (f *File) Readdir(n int) ([]os.FileInfo, error) {
 			continue
 		}
 
-		fis = append(fis, NewFileInfo(path.Base("/"+*fileObject.Key), false, fileObject.Size, *fileObject.LastModified))
+		fis = append(fis, NewFileInfo(path.Base("/"+*fileObject.Key), false, *fileObject.Size, *fileObject.LastModified))
 	}
 
 	return fis, nil
